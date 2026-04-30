@@ -1,0 +1,117 @@
+.home-page { overflow-x: hidden; }
+
+/* Hero */
+.hero {
+  position: relative; min-height: 100vh;
+  display: flex; align-items: center;
+  overflow: hidden;
+}
+.hero-bg { position: absolute; inset: 0; z-index: 0; }
+.hero-orb {
+  position: absolute; border-radius: 50%;
+  filter: blur(80px); opacity: 0.12;
+}
+.orb1 { width: 600px; height: 600px; background: var(--gold); top: -200px; left: -200px; }
+.orb2 { width: 400px; height: 400px; background: #3b82f6; bottom: -100px; right: 10%; }
+.hero-grid {
+  position: absolute; inset: 0;
+  background-image:
+    linear-gradient(var(--border) 1px, transparent 1px),
+    linear-gradient(90deg, var(--border) 1px, transparent 1px);
+  background-size: 60px 60px;
+  mask-image: radial-gradient(ellipse 70% 60% at 50% 50%, black 40%, transparent 100%);
+  opacity: 0.35;
+}
+
+.hero-content {
+  position: relative; z-index: 1;
+  padding-top: calc(var(--nav-height) + 48px);
+  padding-bottom: 80px;
+  max-width: 760px;
+}
+.hero-eyebrow {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-size: 0.78rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--gold); background: var(--gold-bg); border: 1px solid rgba(201,168,76,0.2);
+  padding: 6px 14px; border-radius: 20px; margin-bottom: 24px;
+  animation: fadeIn 0.5s ease both;
+}
+.eyebrow-dot { font-size: 0.6rem; }
+
+.hero-title {
+  margin-bottom: 20px;
+  animation: fadeIn 0.5s ease 0.1s both;
+}
+.hero-desc {
+  font-size: 1.1rem; color: var(--text-secondary); max-width: 520px;
+  margin-bottom: 36px; line-height: 1.7;
+  animation: fadeIn 0.5s ease 0.2s both;
+}
+
+/* Search bar */
+.search-bar {
+  display: flex; gap: 0; max-width: 800px;
+  background: var(--bg-elevated); border: 1px solid var(--border-light);
+  border-radius: var(--radius-xl); padding: 6px; margin-bottom: 40px;
+  animation: fadeIn 0.5s ease 0.3s both;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.5);
+}
+.search-field { display: flex; align-items: center; gap: 10px; padding: 0 16px; }
+.main-field { flex: 1.4; }
+.date-field { flex: 1.2; }
+.search-divider { width: 1px; height: 32px; background: var(--border); align-self: center; opacity: 0.5; }
+.search-icon { color: var(--text-muted); font-size: 1rem; flex-shrink: 0; }
+.search-input {
+  flex: 1; background: none; border: none; outline: none;
+  color: var(--text-primary); font-size: 0.9rem; width: 100%;
+}
+.search-input::placeholder { color: var(--text-muted); }
+
+.date-inputs { display: flex; align-items: center; gap: 4px; flex: 1; }
+.date-input {
+  background: none; border: none; outline: none;
+  color: var(--text-primary); font-size: 0.82rem; width: auto;
+  cursor: pointer; font-family: inherit;
+}
+.date-input::-webkit-calendar-picker-indicator {
+  filter: invert(0.8);
+  cursor: pointer;
+}
+.date-sep { font-size: 0.8rem; color: var(--text-muted); }
+
+.search-btn { border-radius: var(--radius-lg) !important; flex-shrink: 0; padding: 0 24px; }
+
+
+/* Stats */
+.hero-stats {
+  display: flex; align-items: center; gap: 24px;
+  animation: fadeIn 0.5s ease 0.4s both;
+}
+.stat { display: flex; flex-direction: column; }
+.stat-num { font-family: var(--font-display); font-size: 1.6rem; font-weight: 700; color: var(--gold); line-height: 1; }
+.stat-label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; margin-top: 2px; }
+.stat-sep { width: 1px; height: 36px; background: var(--border); }
+
+/* Section header */
+.section-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 28px; }
+
+/* Feature cards */
+.feature-card { text-align: center; padding: 28px 20px; }
+.feature-icon { font-size: 2rem; margin-bottom: 14px; }
+.feature-title { font-size: 1rem; margin-bottom: 8px; }
+.feature-desc { font-size: 0.85rem; color: var(--text-muted); line-height: 1.6; }
+
+/* CTA Banner */
+.cta-banner {
+  position: relative; overflow: hidden;
+  background: var(--bg-elevated); border: 1px solid var(--border-light);
+  border-radius: var(--radius-xl); padding: 56px 48px; text-align: center;
+}
+.cta-glow {
+  position: absolute; top: -80px; left: 50%; transform: translateX(-50%);
+  width: 400px; height: 200px; border-radius: 50%;
+  background: var(--gold); filter: blur(80px); opacity: 0.07;
+}
+.cta-banner h2 { margin-bottom: 12px; }
+.cta-banner p { color: var(--text-secondary); font-size: 1rem; margin-bottom: 28px; }
+.cta-btns { display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap; }

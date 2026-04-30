@@ -1,0 +1,74 @@
+.loyalty-widget {
+  border-radius: var(--radius-lg);
+  padding: 20px 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  border: 1px solid rgba(255,255,255,0.1);
+}
+.loyalty-widget.loading {
+  background: var(--bg-elevated);
+  align-items: center;
+  justify-content: center;
+  min-height: 120px;
+}
+.lw-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.lw-tier-badge {
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.lw-discount {
+  font-size: 0.75rem;
+  font-weight: 500;
+  opacity: 0.85;
+}
+.lw-points {
+  line-height: 1;
+}
+.lw-points-num {
+  font-family: var(--font-display);
+  font-size: 2.2rem;
+  font-weight: 700;
+}
+.lw-points-label {
+  font-size: 0.9rem;
+  opacity: 0.7;
+}
+.lw-bar-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.lw-bar-bg {
+  height: 6px;
+  background: rgba(255,255,255,0.15);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.lw-bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.5s ease;
+}
+.lw-bar-label {
+  font-size: 0.72rem;
+  opacity: 0.75;
+}
+.lw-redeem {
+  font-size: 0.8rem;
+  padding-top: 4px;
+  border-top: 1px solid rgba(255,255,255,0.1);
+}
+.lw-redeem-hint {
+  font-size: 0.72rem;
+  opacity: 0.65;
+  margin-left: 4px;
+}
