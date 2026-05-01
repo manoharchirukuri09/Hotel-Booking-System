@@ -19,6 +19,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.beans.factory.annotation.Value;
 
 @Service
 @RequiredArgsConstructor
@@ -31,6 +32,9 @@ public class AuthServiceImpl implements AuthService {
     private final JwtUtil jwtUtil;
     private final UserDetailsService userDetailsService;
     private final com.hotel.booking.service.EmailService emailService;
+
+    @Value("${app.frontend.url:http://localhost:3000}")
+    private String frontendUrl;
 
     @Override
     @Transactional
@@ -142,7 +146,7 @@ public class AuthServiceImpl implements AuthService {
         user.setResetTokenExpiry(java.time.LocalDateTime.now().plusHours(1));
         userRepository.save(user);
 
-        String resetUrl = "http://localhost:3000/reset-password?token=" + token;
+        String resetUrl = frontendUrl + "/reset-password?token=" + token;
         emailService.sendPasswordResetEmail(user, resetUrl);
         log.info("Password reset token generated for user: {}", email);
     }
