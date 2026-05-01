@@ -1,91 +1,101 @@
 package com.hotel.booking.service;
 
 import com.hotel.booking.model.Booking;
-import jakarta.mail.MessagingException;
-import jakarta.mail.internet.MimeMessage;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class EmailService {
 
-    private final JavaMailSender mailSender;
+    @Value("${email.api.key:}")
+    private String apiKey;
+
+    @Value("${email.sender.email:manoharchirukuri09@gmail.com}")
+    private String senderEmail;
+
+    @Value("${email.sender.name:LuxStay}")
+    private String senderName;
+
+    private final ObjectMapper objectMapper;
     private static final DateTimeFormatter DATE_FMT = DateTimeFormatter.ofPattern("dd MMM yyyy");
+    private final HttpClient httpClient = HttpClient.newHttpClient();
+
+    private void sendEmailViaBrevo(String toEmail, String subject, String htmlContent) {
+        if (apiKey == null || apiKey.isBlank()) {
+            log.warn("Email API key is not configured. Cannot send email to {} (Subject: {})", toEmail, subject);
+            return;
+        }
+
+        try {
+            Map<String, Object> payload = Map.of(
+                    "sender", Map.of("name", senderName, "email", senderEmail),
+                    "to", List.of(Map.of("email", toEmail)),
+                    "subject", subject,
+                    "htmlContent", htmlContent
+            );
+
+            String requestBody = objectMapper.writeValueAsString(payload);
+
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create("https://api.brevo.com/v3/smtp/email"))
+                    .header("accept", "application/json")
+                    .header("api-key", apiKey)
+                    .header("content-type", "application/json")
+                    .POST(HttpRequest.BodyPublishers.ofString(requestBody))
+                    .build();
+
+            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+
+            if (response.statusCode() >= 200 && response.statusCode() < 300) {
+                log.info("Email sent successfully to {}", toEmail);
+            } else {
+                log.error("Failed to send email. Status: {}, Response: {}", response.statusCode(), response.body());
+            }
+        } catch (Exception e) {
+            log.error("Exception while sending email: {}", e.getMessage());
+        }
+    }
 
     @Async
     public void sendBookingConfirmation(Booking booking) {
-        try {
-            MimeMessage message = mailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
-
-            helper.setTo(booking.getUser().getEmail());
-            helper.setSubject("Booking Confirmed - " + booking.getReservationNumber());
-            helper.setText(buildEmailHtml(booking), true);
-
-            mailSender.send(message);
-            log.info("Confirmation email sent for booking: {}", booking.getReservationNumber());
-        } catch (MessagingException e) {
-            log.error("Failed to send email: {}", e.getMessage());
-        }
+        String subject = "Booking Confirmed - " + booking.getReservationNumber();
+        String html = buildEmailHtml(booking);
+        sendEmailViaBrevo(booking.getUser().getEmail(), subject, html);
     }
 
     @Async
     public void sendBookingCancellation(Booking booking) {
-        try {
-            MimeMessage message = mailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
-
-            helper.setTo(booking.getUser().getEmail());
-            helper.setSubject("Booking Cancelled - " + booking.getReservationNumber());
-            helper.setText(buildCancellationEmailHtml(booking), true);
-
-            mailSender.send(message);
-            log.info("Cancellation email sent for booking: {}", booking.getReservationNumber());
-        } catch (MessagingException e) {
-            log.error("Failed to send cancellation email: {}", e.getMessage());
-        }
+        String subject = "Booking Cancelled - " + booking.getReservationNumber();
+        String html = buildCancellationEmailHtml(booking);
+        sendEmailViaBrevo(booking.getUser().getEmail(), subject, html);
     }
 
     @Async
     public void sendWelcomeEmail(com.hotel.booking.model.User user) {
-        try {
-            MimeMessage message = mailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
-
-            helper.setTo(user.getEmail());
-            helper.setSubject("Welcome to LuxStay - Registration Successful");
-            helper.setText(buildWelcomeEmailHtml(user), true);
-
-            mailSender.send(message);
-            log.info("Welcome email sent to: {}", user.getEmail());
-        } catch (MessagingException e) {
-            log.error("Failed to send welcome email: {}", e.getMessage());
-        }
+        String subject = "Welcome to LuxStay - Registration Successful";
+        String html = buildWelcomeEmailHtml(user);
+        sendEmailViaBrevo(user.getEmail(), subject, html);
     }
 
     @Async
     public void sendPasswordResetEmail(com.hotel.booking.model.User user, String resetUrl) {
-        try {
-            MimeMessage message = mailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
-
-            helper.setTo(user.getEmail());
-            helper.setSubject("Reset Your LuxStay Password");
-            helper.setText(buildResetEmailHtml(user, resetUrl), true);
-
-            mailSender.send(message);
-            log.info("Password reset email sent to: {}", user.getEmail());
-        } catch (MessagingException e) {
-            log.error("Failed to send password reset email: {}", e.getMessage());
-        }
+        String subject = "Reset Your LuxStay Password";
+        String html = buildResetEmailHtml(user, resetUrl);
+        sendEmailViaBrevo(user.getEmail(), subject, html);
     }
 
     private String buildResetEmailHtml(com.hotel.booking.model.User user, String resetUrl) {
