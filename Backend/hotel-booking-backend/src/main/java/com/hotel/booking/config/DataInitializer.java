@@ -31,7 +31,22 @@ public class DataInitializer {
     public CommandLineRunner seedData() {
         return args -> {
             if (userRepo.count() > 0) {
-                log.info("Database already has data — skipping seed.");
+                log.info("Database already has data.");
+                if (userRepo.findByEmail("admin@gmail.com").isEmpty()) {
+                    log.info("Creating missing admin user: admin@gmail.com");
+                    userRepo.save(User.builder()
+                        .fullName("admin")
+                        .email("admin@gmail.com")
+                        .password(passwordEncoder.encode("admin@1234"))
+                        .phone("9000000001")
+                        .role(User.Role.ADMIN)
+                        .enabled(true)
+                        .loyaltyPoints(0)
+                        .loyaltyTier(User.LoyaltyTier.BRONZE)
+                        .build());
+                } else {
+                    log.info("Admin user admin@gmail.com already exists.");
+                }
                 return;
             }
 
