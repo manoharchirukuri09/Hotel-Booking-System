@@ -39,9 +39,9 @@ public class DataInitializer {
 
             // ── Users ──────────────────────────────────────────────────────────
             User admin = userRepo.save(User.builder()
-                .fullName("Admin User")
-                .email("admin@hotelbooking.com")
-                .password(passwordEncoder.encode("Admin@1234"))
+                .fullName("admin")
+                .email("admin@gmail.com")
+                .password(passwordEncoder.encode("admin@1234"))
                 .phone("9000000001")
                 .role(User.Role.ADMIN)
                 .enabled(true)
@@ -60,7 +60,7 @@ public class DataInitializer {
                 .loyaltyTier(User.LoyaltyTier.SILVER)
                 .build());
 
-            log.info("Created users: admin@hotelbooking.com / Admin@1234  |  ravi@test.com / Test@1234");
+            log.info("Created users: admin@gmail.com / admin@1234  |  ravi@test.com / Test@1234");
 
             // ── Hotels ─────────────────────────────────────────────────────────
             Hotel h1 = hotelRepo.save(Hotel.builder()
