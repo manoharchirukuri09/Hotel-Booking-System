@@ -75,7 +75,7 @@ export function LoginPage() {
         <div className="demo-hint">
           <p className="demo-title">Demo Credentials</p>
           <p>Customer: <code>customer@test.com / test123</code></p>
-          <p>Admin: <code>admin@hotelbooking.com / Admin@1234</code></p>
+          <p>Admin: <code className="text-yellow-400 bg-gray-800 px-2 py-0.5 rounded">admin@gmail.com / admin@1234</code></p>
         </div>
       </div>
     </div>
