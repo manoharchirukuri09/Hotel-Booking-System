@@ -182,27 +182,42 @@ public class BookingServiceImpl implements BookingService {
         Booking b = bookingRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Booking not found: " + id));
         
-        if (!b.getUser().getEmail().equals(userEmail))
+        // Force-initialize lazy associations to avoid LazyInitializationException
+        User owner = b.getUser();
+        if (owner == null) throw new ResourceNotFoundException("Booking owner not found");
+        
+        if (!owner.getEmail().equals(userEmail))
             throw new BadRequestException("You are not authorized to cancel this booking");
         
         if (b.getStatus() == Booking.BookingStatus.CANCELLED)
             throw new BadRequestException("Booking is already cancelled");
+        
+        if (b.getStatus() == Booking.BookingStatus.COMPLETED)
+            throw new BadRequestException("Completed bookings cannot be cancelled");
         
         // Rule: Can only cancel BEFORE the check-in date
         if (!LocalDate.now().isBefore(b.getCheckInDate()))
             throw new BadRequestException("Cancellations are only allowed before the check-in date.");
 
         // Refund loyalty points that were earned on this booking (since it's being cancelled)
-        if (b.getLoyaltyPointsEarned() > 0) {
-            User user = b.getUser();
-            user.redeemLoyaltyPoints(Math.min(b.getLoyaltyPointsEarned(), user.getLoyaltyPoints()));
-            userRepository.save(user);
+        try {
+            if (b.getLoyaltyPointsEarned() > 0) {
+                owner.redeemLoyaltyPoints(Math.min(b.getLoyaltyPointsEarned(), owner.getLoyaltyPoints()));
+                userRepository.save(owner);
+            }
+        } catch (Exception e) {
+            log.warn("Failed to refund loyalty points for booking {}: {}", b.getReservationNumber(), e.getMessage());
         }
 
         b.setStatus(Booking.BookingStatus.CANCELLED);
         Booking updated = bookingRepository.save(b);
+        
+        // Pre-fetch lazy associations before mapping to response (prevents LazyInitException)
+        String hotelName = updated.getHotel().getName();
+        String roomNumber = updated.getRoom().getRoomNumber();
+        log.info("Cancelled booking {} for hotel {} room {}", updated.getReservationNumber(), hotelName, roomNumber);
 
-        // Send Cancellation Email
+        // Send Cancellation Email (async — may run after transaction closes)
         try {
             emailService.sendBookingCancellation(updated);
         } catch (Exception e) {
@@ -247,8 +262,8 @@ public class BookingServiceImpl implements BookingService {
                 .numberOfNights((int) nights)
                 .numberOfGuests(b.getNumberOfGuests())
                 .pricePerNight(b.getRoom().getPricePerNight())
-                .discountAmount(b.getDiscountAmount())
-                .loyaltyDiscountAmount(b.getLoyaltyDiscountAmount())
+                .discountAmount(b.getDiscountAmount() != null ? b.getDiscountAmount() : BigDecimal.ZERO)
+                .loyaltyDiscountAmount(b.getLoyaltyDiscountAmount() != null ? b.getLoyaltyDiscountAmount() : BigDecimal.ZERO)
                 .loyaltyPointsEarned(b.getLoyaltyPointsEarned())
                 .loyaltyPointsRedeemed(b.getLoyaltyPointsRedeemed())
                 .totalAmount(b.getTotalAmount())
